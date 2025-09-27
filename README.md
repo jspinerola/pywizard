@@ -1,4 +1,4 @@
-<img  src="https://static.wikia.nocookie.net/pizzatower/images/b/b7/Bg_minigolf_pizzard.png/revision/latest/scale-to-width-down/250?cb=20230709130514" />
+<img width="312" height="563" alt="pywizard" src="https://github.com/user-attachments/assets/859a36dd-2d13-43f5-8186-6d36415f2c9c" />
 
 # pywizard
 Python Source Code Analyzer
