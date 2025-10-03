@@ -5,12 +5,7 @@ import { python } from "@codemirror/lang-python";
 function CodeEditor() {
   const [code, setCode] = React.useState('print("Hello, Python!")');
 
-  interface OnChangeParams {
-    value: string;
-    viewUpdate: any; // Replace `any` with a specific type if available from the library
-  }
-
-  const onChange = React.useCallback(({ value, viewUpdate }: OnChangeParams) => {
+  const onChange = React.useCallback((value: string, viewUpdate: any) => {
     setCode(value);
   }, []);
 
