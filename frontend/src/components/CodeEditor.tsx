@@ -4,16 +4,17 @@ import { python } from "@codemirror/lang-python";
 import { Button } from "./ui/button";
 import { loadPyodide } from "pyodide";
 import type { CodeOutput } from "@/types/CodeOutput";
+import { Textarea } from "./ui/textarea";
 
 function CodeEditor({
   setOutput,
 }: {
   setOutput: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
-
   // State to hold the code input and loading status
   const [code, setCode] = React.useState('print("Hello, Python!")');
   const [loading, setLoading] = React.useState(false);
+  const [input, setInput] = React.useState("");
 
   // Memoized callback to handle code changes
   const onChange = React.useCallback((value: string, viewUpdate: any) => {
@@ -62,7 +63,7 @@ function CodeEditor({
     console.log("Running code:", code);
     setOutput([]);
     setLoading(true);
-    workerRef.current?.postMessage(code);
+    workerRef.current?.postMessage({ type: "run", code, input });
     console.log("Message posted to worker");
   }
 
@@ -84,6 +85,14 @@ function CodeEditor({
           Run Code
         </Button>
       )}
+      <br />
+      <label htmlFor="input">Input (stdin):</label>
+      <Textarea
+        id="input"
+        placeholder="Enter input here separated by new lines"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
     </div>
   );
 }
