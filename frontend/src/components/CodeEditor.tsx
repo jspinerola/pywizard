@@ -1,98 +1,138 @@
-import React, { useMemo } from "react";
+import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import { Button } from "./ui/button";
-import { loadPyodide } from "pyodide";
-import type { CodeOutput } from "@/types/CodeOutput";
+import type { CodeOutput } from "@/types/codeOutput";
 import { Textarea } from "./ui/textarea";
+
+type TracePayload = { filename: string; code: string; trace: any[] };
 
 function CodeEditor({
   setOutput,
+  onTrace,
 }: {
   setOutput: React.Dispatch<React.SetStateAction<string[]>>;
+  onTrace?: (payload: TracePayload) => void;
 }) {
-  // State to hold the code input and loading status
   const [code, setCode] = React.useState('print("Hello, Python!")');
-  const [loading, setLoading] = React.useState(false);
   const [input, setInput] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [ready, setReady] = React.useState(false);
 
-  // Memoized callback to handle code changes
-  const onChange = React.useCallback((value: string, viewUpdate: any) => {
-    setCode(value);
-  }, []);
-
-  // Ref to hold the worker instance
   const workerRef = React.useRef<Worker | null>(null);
+  const createdRef = React.useRef(false); // StrictMode guard
+  const onTraceRef = React.useRef(onTrace);
+  onTraceRef.current = onTrace; // keep latest without re-running effect
 
-  // Effect to initialize the web worker
+  const onChange = React.useCallback((value: string) => setCode(value), []);
+
+  // Create the worker ONCE
   React.useEffect(() => {
-    const worker = new Worker(
-      new URL("../workers/codeWorker.ts", import.meta.url)
-    );
+    if (createdRef.current) return;
+    createdRef.current = true;
+
+    const worker = new Worker(new URL("../workers/codeWorker.ts", import.meta.url));
     workerRef.current = worker;
 
-    // Handle messages from the worker
-    worker.onmessage = (event: MessageEvent<CodeOutput>) => {
-      console.log("Message received from worker", event.data);
+    setOutput(["Starting Python runtime…"]);
+    setLoading(true);
+    setReady(false);
 
-      if (event.data.type === "initialized") {
+    worker.onmessage = (event: MessageEvent<CodeOutput | any>) => {
+      const data = event.data;
+
+      if (data.type === "initialized") {
+        setReady(true);
         setLoading(false);
-      } else if (event.data.type === "stdout" || event.data.type === "error") {
-        let result = event.data.message;
-        setOutput((prev) => [...prev, result]);
-        setLoading(false);
-      } else {
-        console.warn("Unknown message type from worker:", event.data);
+        setOutput(["Ready."]);
+        return;
       }
+
+      if (data.type === "trace") {
+        const payload = data.payload as TracePayload;
+        const stdout =
+          (payload.trace || []).map((e: any) => e["out+"] || "").join("") || "(no output)";
+        setOutput([stdout]);
+        onTraceRef.current?.(payload);
+        setLoading(false);
+        return;
+      }
+
+      if (data.type === "error") {
+        setOutput((prev) => [...prev, data.message]);
+        setLoading(false);
+        return;
+      }
+
+      console.warn("Unknown message from worker:", data);
     };
 
-    // Initialize Pyodide in the worker
-    setLoading(true);
     worker.postMessage({ type: "init" });
-    console.log("Initialization message sent to worker");
 
-    // Cleanup function to terminate the worker on unmount
     return () => {
       worker.terminate();
       workerRef.current = null;
     };
-  }, [setOutput]);
+    // DO NOT add deps here — we want this to run exactly once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Function to handle code execution
-  async function handleRunCode() {
-    console.log("Running code:", code);
+  const handleRunCode = React.useCallback(() => {
+    if (!workerRef.current) {
+      setOutput(["Worker not created."]);
+      return;
+    }
+    if (!ready) {
+      setOutput(["Initializing Python… please wait, then try again."]);
+      return;
+    }
     setOutput([]);
     setLoading(true);
-    workerRef.current?.postMessage({ type: "run", code, input });
-    console.log("Message posted to worker");
-  }
+    workerRef.current.postMessage({ type: "run", code, input });
+  }, [code, input, ready, setOutput]);
+
+  // QoL: Ctrl/Cmd+Enter to run
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "enter" && !loading) {
+        e.preventDefault();
+        handleRunCode();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handleRunCode, loading]);
 
   return (
-    <div>
-      <CodeMirror
-        value={code}
-        height="200px"
-        extensions={[python()]}
-        onChange={onChange}
-      />
-      {loading ? (
-        <Button disabled>Loading...</Button>
-      ) : (
+    <div className="space-y-3">
+      <CodeMirror value={code} height="240px" extensions={[python()]} onChange={onChange} />
+
+      <div className="flex items-center gap-2">
         <Button
           className="bg-background text-foreground"
           onClick={handleRunCode}
+          disabled={loading || !ready || !workerRef.current}
+          title={ready ? "Run (Ctrl/Cmd + Enter)" : "Initializing Python…"}
         >
-          Run Code
+          {ready ? (loading ? "Running…" : "Run Code") : "Initializing…"}
         </Button>
-      )}
-      <br />
-      <label htmlFor="input">Input (stdin):</label>
-      <Textarea
-        id="input"
-        placeholder="Enter input here separated by new lines"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      />
+        <Button variant="secondary" onClick={() => setOutput([])} disabled={loading}>
+          Clear Output
+        </Button>
+      </div>
+
+      <div className="space-y-1">
+        <label htmlFor="input" className="text-sm opacity-80">
+          Input (stdin):
+        </label>
+        <Textarea
+          id="input"
+          placeholder="Enter input here, one line per input()"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={loading}
+        />
+      </div>
     </div>
   );
 }
