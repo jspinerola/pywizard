@@ -1,2 +1,4 @@
 backend/venv/
 frontend/node_modules/
+.idea/
+.vscode/
