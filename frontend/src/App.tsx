@@ -1,6 +1,7 @@
 import "./App.css";
 import CodeEditor from "./components/CodeEditor";
 import CodeWrapper from "./components/CodeWrapper";
+import TracePlayer from "./components/TracePlayer";
 
 function App() {
   return (
