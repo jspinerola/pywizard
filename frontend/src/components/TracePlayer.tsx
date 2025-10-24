@@ -105,8 +105,10 @@ export default function TracePlayer({ payload }: { payload: TracePayload | null 
         setPlaying(false);
         return;
       }
-      const nextEv = trace[stepIndex + 1];
-      const waitMs = (nextEv?.dt ?? 0) / 1_000_000 / Math.max(0.001, speed);
+      const nextEvent = trace[stepIndex + 1];
+      const baseMs = (nextEvent?.dt ?? 0) / 1_000_000;
+      const waitMs = Math.max(400, baseMs / Math.max(0.001, speed));
+
       if (lastTsRef.current == null) lastTsRef.current = nowMs;
       const elapsed = nowMs - lastTsRef.current;
       if (elapsed >= waitMs) {
@@ -125,12 +127,13 @@ export default function TracePlayer({ payload }: { payload: TracePayload | null 
   useEffect(() => {
     if (!autoScroll || !state.lastEvent) return;
     const lineNum = state.lastEvent.line;
-    const el = document.getElementById(`code-line-${lineNum}`);
-    if (el && codePaneRef.current) {
+    const element = document.getElementById(`code-line-${lineNum}`);
+
+    if (element && codePaneRef.current) {
       const parent = codePaneRef.current;
-      const elTop = el.offsetTop;
-      if (elTop < parent.scrollTop || elTop > parent.scrollTop + parent.clientHeight - 60) {
-        parent.scrollTo({ top: Math.max(0, elTop - parent.clientHeight / 3), behavior: "smooth" });
+      const elementTopOffset = element.offsetTop;
+      if (elementTopOffset < parent.scrollTop || elementTopOffset > parent.scrollTop + parent.clientHeight - 60) {
+        parent.scrollTo({ top: Math.max(0, elementTopOffset - parent.clientHeight / 3), behavior: "smooth" });
       }
     }
   }, [state.lastEvent, autoScroll]);
@@ -148,7 +151,7 @@ return (
     <div className="max-w-[1300px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Controls */}
       <div className="lg:col-span-1 space-y-3">
-        <Panel title="Transport">
+        <Panel title="Controls">
           <div className="flex items-center gap-2 flex-wrap">
             <button className={btn()} onClick={() => setStepIndex(0)}>⏮️ Reset</button>
             <button className={btn()} onClick={() => setStepIndex(s => Math.max(0, s - 1))}>◀️ Prev</button>
@@ -216,10 +219,10 @@ return (
 
         <Panel title="Locals (by frame)">
           <div className="flex flex-wrap gap-2 mb-2">
-            {Object.values(state.frames).sort((a,b)=>a.depth-b.depth || a.fid-b.fid).map(fr => (
-              <button key={fr.fid} className={tag(fr.fid === selectedFid, fr.closed)} onClick={()=>setSelectedFid(fr.fid)}>
-                {fr.func} <span className="opacity-70">#{fr.fid}</span>
-                {fr.closed && <span className="ml-1">✔</span>}
+            {Object.values(state.frames).sort((a,b)=>a.depth-b.depth || a.fid-b.fid).map(frame => (
+              <button key={frame.fid} className={tag(frame.fid === selectedFid, frame.closed)} onClick={()=>setSelectedFid(frame.fid)}>
+                {frame.func} <span className="opacity-70">#{frame.fid}</span>
+                {frame.closed && <span className="ml-1">✔</span>}
               </button>
             ))}
           </div>

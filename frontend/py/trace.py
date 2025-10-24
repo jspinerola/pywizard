@@ -10,7 +10,7 @@ def safe(val):
     except Exception: return str(val)
 
 def trace_exec(code_text: str) -> str:
-    # ---- tracer state (compact animatable) ----
+    # ---- tracer state ----
     trace, stdout_buf = [], io.StringIO()
     _last_locals_by_fid = {}; _next_fid = 1
     fid_by_frame = {}; parent_fid = {}; depth_by_frame = {}
@@ -25,36 +25,42 @@ def trace_exec(code_text: str) -> str:
         'set': set, 'tuple': tuple, 'enumerate': enumerate, 'zip': zip, 'sum': sum,
     }
 
-    def _get_fid(frame):
+    def get_fid(frame):
         nonlocal _next_fid
         k = id(frame)
         if k not in fid_by_frame:
             fid_by_frame[k] = _next_fid; _next_fid += 1
         return fid_by_frame[k]
 
-    def _ensure_parent_depth(frame):
+    def ensure_parent_depth(frame):
         k = id(frame)
         if k in depth_by_frame: return
         p = frame.f_back; pfid = None; pdepth = -1
         while p:
             if p.f_code.co_filename == USER_FILENAME:
-                pfid = _get_fid(p); pdepth = depth_by_frame.get(id(p), pdepth); break
+                pfid = get_fid(p); pdepth = depth_by_frame.get(id(p), pdepth); break
             p = p.f_back
         parent_fid[k] = pfid; depth_by_frame[k] = pdepth + 1
 
-    def _locals_patch(fid, f_locals):
+    # Track local variable changes 
+    # Prev locals: {"x": 1, "y": 2}
+    # Curr locals: {"x": 2, "y": 2, "z": 9}
+    # Result:
+    # changed_locals = {"x": 2, "z": 9} (added/changed)
+    # previous_locals = {"x": 1} (previous value for the changed key)
+    def locals_patch(fid, f_locals):
         prev = _last_locals_by_fid.get(fid, {})
         filtered = {k: v for k, v in f_locals.items() if not _exclude_local(k, v)}
         curr = {k: safe(v) for k, v in filtered.items()}
-        setp, prevp = {}, {}
+        changed_locals, previous_locals = {}, {}
         for k, v in curr.items():
             if k not in prev or prev[k] != v:
-                setp[k] = v
-                if k in prev: prevp[k] = prev[k]
+                changed_locals[k] = v
+                if k in prev: previous_locals[k] = prev[k]
         _last_locals_by_fid[fid] = curr
-        return setp, prevp
+        return changed_locals, previous_locals
 
-    def _tick():
+    def tick():
         nonlocal _step, _prev_ts
         _step += 1
         now = time.perf_counter_ns()
@@ -67,10 +73,11 @@ def trace_exec(code_text: str) -> str:
         if frame.f_code.co_filename != USER_FILENAME or event not in ("call","line","return","exception"):
             return tracer
 
-        _ensure_parent_depth(frame)
-        fid = _get_fid(frame)
-        pf = parent_fid.get(id(frame)); dep = depth_by_frame.get(id(frame), 0)
-        step, ts, dt = _tick()
+        ensure_parent_depth(frame)
+        fid = get_fid(frame)
+        pf = parent_fid.get(id(frame)); 
+        dep = depth_by_frame.get(id(frame), 0)
+        step, ts, dt = tick()
         ev = {
             "step": step, "ts": ts, "dt": dt,
             "event": "Exception" if event=="exception" else event.capitalize(),
@@ -84,18 +91,18 @@ def trace_exec(code_text: str) -> str:
             if varargs and varargs in values: call_args["*"+varargs] = safe(values[varargs])
             if varkw and varkw in values: call_args["**"+varkw] = safe(values[varkw])
             if call_args: ev["args"] = call_args
-            setp, prevp = _locals_patch(fid, frame.f_locals)
-            if setp: ev["set"]=setp; ev["prev"]=prevp
+            changed_locals, prev_locals = locals_patch(fid, frame.f_locals)
+            if changed_locals: ev["set"]=changed_locals; ev["prev"]=prev_locals
 
         elif event == "line":
-            setp, prevp = _locals_patch(fid, frame.f_locals)
-            if setp: ev["set"]=setp; ev["prev"]=prevp
+            changed_locals, prev_locals = locals_patch(fid, frame.f_locals)
+            if changed_locals: ev["set"]=changed_locals; ev["prev"]=prev_locals
 
         elif event == "return":
-            ev["ret"] = safe(arg)
+            ev["return"] = safe(arg)
 
         elif event == "exception":
-            et, evv, tb = arg
+            et, evv = arg
             ev["exc_type"] = getattr(et, "__name__", str(et))
             ev["exc"] = str(evv)
 
