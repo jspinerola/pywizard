@@ -5,7 +5,7 @@ function Layout() {
   return (
     <>
       <div>Header</div>
-      <main>
+      <main className="w-full mx-auto container">
         <Outlet />
       </main>
       <div>Footer</div>
