@@ -4,6 +4,8 @@ import { python } from "@codemirror/lang-python";
 import { Button } from "./ui/button";
 import type { CodeOutput } from "@/types/codeOutput";
 import { Textarea } from "./ui/textarea";
+import { vscodeDark, vscodeDarkInit } from "@uiw/codemirror-theme-vscode";
+import { Save } from "lucide-react";
 
 type TracePayload = { filename: string; code: string; trace: any[] };
 
@@ -31,7 +33,9 @@ function CodeEditor({
     if (createdRef.current) return;
     createdRef.current = true;
 
-    const worker = new Worker(new URL("../workers/codeWorker.ts", import.meta.url));
+    const worker = new Worker(
+      new URL("../workers/codeWorker.ts", import.meta.url)
+    );
     workerRef.current = worker;
 
     setOutput(["Starting Python runtime…"]);
@@ -53,7 +57,8 @@ function CodeEditor({
         // Print to the DevTools console for easier debugging
         console.log("Trace payload:", JSON.stringify(payload, null, 2));
         const stdout =
-          (payload.trace || []).map((e: any) => e["out+"] || "").join("") || "(no output)";
+          (payload.trace || []).map((e: any) => e["out+"] || "").join("") ||
+          "(no output)";
         setOutput([stdout]);
         onTraceRef.current?.(payload);
         setLoading(false);
@@ -96,7 +101,11 @@ function CodeEditor({
   // QoL: Ctrl/Cmd+Enter to run
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "enter" && !loading) {
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "enter" &&
+        !loading
+      ) {
         e.preventDefault();
         handleRunCode();
       }
@@ -106,34 +115,51 @@ function CodeEditor({
   }, [handleRunCode, loading]);
 
   return (
-    <div className="space-y-3">
-      <CodeMirror value={code} height="240px" extensions={[python()]} onChange={onChange} />
-
-      <div className="flex items-center gap-2">
-        <Button
-          className="bg-background text-foreground"
-          onClick={handleRunCode}
-          disabled={loading || !ready || !workerRef.current}
-          title={ready ? "Run (Ctrl/Cmd + Enter)" : "Initializing Python…"}
-        >
-          {ready ? (loading ? "Running…" : "Run Code") : "Initializing…"}
-        </Button>
-        <Button variant="secondary" onClick={() => setOutput([])} disabled={loading}>
-          Clear Output
-        </Button>
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex justify-between mb-4">
+        <h2 className="font-mono text-2xl font-bold text-secondary">Code</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={handleRunCode}
+            disabled={loading || !ready || !workerRef.current}
+            title={ready ? "Run (Ctrl/Cmd + Enter)" : "Initializing Python…"}
+          >
+            {ready ? (loading ? "Running…" : "Run Code") : "Initializing…"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setOutput([])}
+            disabled={loading}
+          >
+            Clear Output
+          </Button>
+          <Button variant="outline" size="icon">
+            <Save />
+          </Button>
+        </div>
       </div>
-
-      <div className="space-y-1">
-        <label htmlFor="input" className="text-sm opacity-80">
-          Input (stdin):
-        </label>
-        <Textarea
-          id="input"
-          placeholder="Enter input here, one line per input()"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={loading}
+      <div className="flex flex-col justify-between h-full">
+        <CodeMirror
+          value={code}
+          height="240px"
+          extensions={[python()]}
+          theme={vscodeDark}
+          onChange={onChange}
         />
+
+        <div className="space-y-1">
+          <label htmlFor="input" className="font-mono font-bold text-secondary">
+            Input (stdin):
+          </label>
+          <Textarea
+            id="input"
+            placeholder="Enter input here, one line per input()"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={loading}
+          />
+        </div>
       </div>
     </div>
   );
