@@ -1,8 +1,8 @@
 import React from "react";
 import CodeEditor from "./CodeEditor";
 import CodeOutput from "./CodeOutput";
-import TracePlayer from "./TracePlayer";
 import type { TracePayload } from "../types/trace";
+import TracePlayer from "./trace/TracePlayer";
 
 function CodeWrapper() {
   const [output, setOutput] = React.useState<string[]>([]);
@@ -10,17 +10,22 @@ function CodeWrapper() {
     null
   );
   return (
-    <div className="code-wrapper">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <section className="">
-          <CodeEditor setOutput={setOutput} onTrace={setTracePayload} />
-        </section>
-        <section className="">
-          <CodeOutput output={output} />
-          <TracePlayer payload={tracePayload} />
-        </section>
+    <>
+      <div className="h-fit">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="h-[24rem]">
+            <CodeEditor setOutput={setOutput} onTrace={setTracePayload} />
+          </section>
+          <section className="h-[24rem] flex flex-col">
+            <CodeOutput output={output} />
+          </section>
+        </div>
       </div>
-    </div>
+      <div className="flex flex-col">
+        <h2 className="font-mono text-2xl font-bold text-secondary">Visualize</h2>
+        <TracePlayer payload={tracePayload} />
+      </div>
+    </>
   );
 }
 

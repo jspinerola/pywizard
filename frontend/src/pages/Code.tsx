@@ -5,7 +5,7 @@ import React from "react";
 function Code() {
   return (
     <div>
-      <div className="">
+      <div className="flex flex-col gap-6">
         <CodeWrapper />
       </div>
     </div>

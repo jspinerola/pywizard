@@ -115,8 +115,8 @@ function CodeEditor({
   }, [handleRunCode, loading]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between">
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex justify-between mb-4">
         <h2 className="font-mono text-2xl font-bold text-secondary">Code</h2>
         <div className="flex items-center gap-2">
           <Button
@@ -139,26 +139,27 @@ function CodeEditor({
           </Button>
         </div>
       </div>
-
-      <CodeMirror
-        value={code}
-        height="240px"
-        extensions={[python()]}
-        theme={vscodeDark}
-        onChange={onChange}
-      />
-
-      <div className="space-y-1">
-        <label htmlFor="input" className="font-mono font-bold text-secondary">
-          Input (stdin):
-        </label>
-        <Textarea
-          id="input"
-          placeholder="Enter input here, one line per input()"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={loading}
+      <div className="flex flex-col justify-between h-full">
+        <CodeMirror
+          value={code}
+          height="240px"
+          extensions={[python()]}
+          theme={vscodeDark}
+          onChange={onChange}
         />
+
+        <div className="space-y-1">
+          <label htmlFor="input" className="font-mono font-bold text-secondary">
+            Input (stdin):
+          </label>
+          <Textarea
+            id="input"
+            placeholder="Enter input here, one line per input()"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={loading}
+          />
+        </div>
       </div>
     </div>
   );
