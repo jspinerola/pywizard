@@ -117,7 +117,7 @@ export function TraceControls({
           <Label htmlFor="auto-scroll">Auto Scroll</Label>
         </div> */}
         </div>
-        <div className="flex flex-col w-full mt-4">
+        <div className="flex flex-col w-full mt-4 gap-1">
           <Label htmlFor="speed-slider" className="mb-1">
             Speed: {speed}x
           </Label>

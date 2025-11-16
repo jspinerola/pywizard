@@ -20,7 +20,7 @@ export function TraceLocals({
   );
 
   return (
-    <TracePanel title="Locals (by frame)">
+    <TracePanel title="Variables and Locals">
       <div className="flex flex-wrap gap-2 mb-2">
         {frames.map((frame) => (
           <Button

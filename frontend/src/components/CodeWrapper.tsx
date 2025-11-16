@@ -17,12 +17,12 @@ function CodeWrapper() {
             <CodeEditor setOutput={setOutput} onTrace={setTracePayload} />
           </section>
           <section className="h-[24rem] flex flex-col">
-            <CodeOutput output={output} />
+            <CodeOutput output={output} payload={tracePayload} />
           </section>
         </div>
       </div>
       <div className="flex flex-col">
-        <h2 className="font-mono text-2xl font-bold text-secondary">Visualize</h2>
+        <h2 className="font-mono text-2xl font-bold text-secondary mb-4">Visualize</h2>
         <TracePlayer payload={tracePayload} />
       </div>
     </>

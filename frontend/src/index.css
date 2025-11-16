@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,6 +43,7 @@
 }
 
 :root {
+  font-family: "Montserrat", "Poppins", "Red Hat Display", sans-serif;
   --radius: 0.3rem;
   --background: #282828;
   --foreground: oklch(1 0 0);
@@ -58,8 +60,8 @@
   --accent: #223b8b;
   --accent-foreground: #ffff;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: #ffffff60;
+  --input: #ffffff60;
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
