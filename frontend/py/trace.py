@@ -1,5 +1,5 @@
-# pywiz_tracer.py  (public/py/pywiz_tracer.py)
-import sys, json, io, time, inspect, linecache
+# pywiz_tracer.py
+import sys, json, io, time, inspect, linecache, traceback
 USER_FILENAME = "<user_code>"
 
 EXCLUDE_LOCAL_KEYS = {"__builtins__", "__package__", "__loader__", "__spec__", "__doc__", "__annotations__"}
@@ -8,6 +8,40 @@ def _exclude_local(k, v): return k in EXCLUDE_LOCAL_KEYS or (k.startswith("__") 
 def safe(val):
     try: return json.loads(json.dumps(val, default=str))
     except Exception: return str(val)
+
+def format_user_error(e):
+    """
+    Produce a short, user-focused message.
+    Handles SyntaxError/IndentationError separately because they happen at compile time.
+    """
+    # --- compile-time errors ---
+    if isinstance(e, SyntaxError):
+        line = (e.text or "").rstrip("\n")
+        caret = ""
+        if e.offset and line:
+            caret = " " * (e.offset - 1) + "^"
+        return (
+            f"{e.__class__.__name__} on line {e.lineno}:\n"
+            f"    {line}\n"
+            f"    {caret}\n"
+            f"→ {e.msg}"
+        )
+
+    # --- runtime errors: filter traceback to USER_FILENAME ---
+    tb = traceback.extract_tb(e.__traceback__)
+    user_frames = [f for f in tb if f.filename == USER_FILENAME]
+
+    if user_frames:
+        f = user_frames[-1]
+        line = (f.line or "").strip()
+        return (
+            f"{e.__class__.__name__} on line {f.lineno}:\n"
+            f"    {line}\n"
+            f"→ {e}"
+        )
+
+    return f"{e.__class__.__name__}: {e}"
+
 
 def trace_exec(code_text: str) -> str:
     # ---- tracer state ----
@@ -42,12 +76,6 @@ def trace_exec(code_text: str) -> str:
             p = p.f_back
         parent_fid[k] = pfid; depth_by_frame[k] = pdepth + 1
 
-    # Track local variable changes 
-    # Prev locals: {"x": 1, "y": 2}
-    # Curr locals: {"x": 2, "y": 2, "z": 9}
-    # Result:
-    # changed_locals = {"x": 2, "z": 9} (added/changed)
-    # previous_locals = {"x": 1} (previous value for the changed key)
     def locals_patch(fid, f_locals):
         prev = _last_locals_by_fid.get(fid, {})
         filtered = {k: v for k, v in f_locals.items() if not _exclude_local(k, v)}
@@ -75,7 +103,7 @@ def trace_exec(code_text: str) -> str:
 
         ensure_parent_depth(frame)
         fid = get_fid(frame)
-        pf = parent_fid.get(id(frame)); 
+        pf = parent_fid.get(id(frame))
         dep = depth_by_frame.get(id(frame), 0)
         step, ts, dt = tick()
         ev = {
@@ -113,20 +141,37 @@ def trace_exec(code_text: str) -> str:
 
         trace.append(ev)
         if event == "return":
-            # finish frame bookkeeping
             k = id(frame)
             fid_by_frame.pop(k, None); parent_fid.pop(k, None); depth_by_frame.pop(k, None)
         return tracer
 
-    # preload source for nice line lookups later (optional)
-    linecache.cache[USER_FILENAME] = (len(code_text), None, [l + "\n" for l in code_text.splitlines()], USER_FILENAME)
+    # preload source for nice line lookups later
+    linecache.cache[USER_FILENAME] = (
+        len(code_text), None, [l + "\n" for l in code_text.splitlines()], USER_FILENAME
+    )
 
     env = {"__builtins__": SAFE_BUILTINS, "__name__": "__main__"}
     sys.settrace(tracer)
+
     try:
         compiled = compile(code_text, USER_FILENAME, "exec")
         exec(compiled, env, env)
+
+        return json.dumps({
+            "ok": True,
+            "filename": USER_FILENAME,
+            "code": code_text,
+            "trace": trace
+        })
+
+    except Exception as e:
+        return json.dumps({
+            "ok": False,
+            "filename": USER_FILENAME,
+            "code": code_text,
+            "trace": trace,   # trace up to crash (if any)
+            "error": format_user_error(e)
+        })
+
     finally:
         sys.settrace(None)
-
-    return json.dumps({"filename": USER_FILENAME, "code": code_text, "trace": trace})
