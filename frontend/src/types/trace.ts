@@ -1,7 +1,7 @@
 // types/trace.ts
 export type TraceEvent = {
   step: number; ts: number; dt: number;
-  event: "Call" | "Line" | "Return" | string;
+  event: "Call" | "Line" | "Return"  | "Input" | string;
   func: string; line: number; fid: number; parent: number | null; depth: number;
   args?: Record<string, unknown>;
   set?: Record<string, unknown>;

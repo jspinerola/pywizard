@@ -8,7 +8,7 @@ type TraceEvent = {
   step: number;
   ts: number;
   dt: number;
-  event: "Call" | "Line" | "Return" | string;
+  event: "Call" | "Line" | "Return" | "Input" | string;
   func: string;
   line: number;
   fid: number;
@@ -18,6 +18,9 @@ type TraceEvent = {
   set?: Record<string, unknown>;
   prev?: Record<string, unknown>;
   ret?: unknown;
+  prompt?: string;
+  value?: string;
+  label?: string;
   [key: string]: unknown; // out+
 };
 
@@ -43,6 +46,10 @@ function reconstructState(trace: TraceEvent[], stepIndex: number) {
       locals: Record<string, unknown>;
       closed: boolean;
       ret?: unknown;
+      prompt?: string;
+      value?: string;
+      label?: string;
+
     }
   > = {};
   let lastEvent: TraceEvent | null = null;
@@ -60,6 +67,9 @@ function reconstructState(trace: TraceEvent[], stepIndex: number) {
         parent: ev.parent ?? null,
         locals: {},
         closed: false,
+        prompt: ev.prompt,
+        value: ev.value,
+        label: ev.label,
       };
       if (ev.args) Object.assign(frames[ev.fid].locals, ev.args);
     }
