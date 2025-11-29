@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from enum import Enum
+from ai_routes import router as ai_router # import routes - ai_routes.py
 
 
 class Fruit(BaseModel):
@@ -13,6 +14,7 @@ class Fruits(BaseModel):
   fruits: List[Fruit]
 
 app = FastAPI()
+app.include_router(ai_router) # connecting the router
 
 # allowed origins, frontend url
 origins = [
