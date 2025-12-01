@@ -223,7 +223,7 @@ def trace_exec(code_text: str) -> str:
             "filename": USER_FILENAME,
             "code": code_text,
             "trace": trace,
-            "error": "Your code called input(), but no input was provided. \n Please add input in the Input box and try again."
+            "error": "Your code called input(), but no input was provided.\n Please add input in the Input box and try again."
         })
 
     except Exception as e:
