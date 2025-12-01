@@ -64,6 +64,9 @@ self.onmessage = async (event: MessageEvent<any>) => {
       `);
       const payload = JSON.parse(jsonStr);
       self.postMessage({ type: "trace", payload }); // { filename, code, trace: [...] }
+      if (payload.ok === false) {
+        self.postMessage({ type: "error", message: payload.error });
+      }
     } catch (err: any) {
       self.postMessage({ type: "error", message: String(err) });
     } finally {
