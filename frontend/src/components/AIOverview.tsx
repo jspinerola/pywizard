@@ -152,7 +152,7 @@ function AIOverview({
               )}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-muted text-foreground rounded-lg px-4 py-3 flex items-center gap-2">
+                  <div className="bg-muted text-secondary-foreground rounded-lg px-4 py-3 flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">Thinking...</span>
                   </div>

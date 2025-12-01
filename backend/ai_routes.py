@@ -17,7 +17,7 @@ class SummaryRequest(BaseModel):
 # --- Endpoints ---
 @router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    conversation = request.history + [request.message, request.code]
+    conversation = request.history + [request.message, "The code is: " + request.code]
     response = AIService.generate_chat_response(conversation)
     
     if response.startswith("Error"):
