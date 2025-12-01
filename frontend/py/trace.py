@@ -217,7 +217,7 @@ def trace_exec(code_text: str) -> str:
         })
     
     except EOFError:
-    # Code called input() but there was nothing in stdin
+        # Code called input() but there was nothing in stdin
         return json.dumps({
             "ok": False,
             "filename": USER_FILENAME,
