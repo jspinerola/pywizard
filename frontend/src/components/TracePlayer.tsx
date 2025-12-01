@@ -49,7 +49,6 @@ function reconstructState(trace: TraceEvent[], stepIndex: number) {
       prompt?: string;
       value?: string;
       label?: string;
-
     }
   > = {};
   let lastEvent: TraceEvent | null = null;
