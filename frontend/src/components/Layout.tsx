@@ -7,10 +7,10 @@ function Layout() {
   return (
     <>
       <Nav />
-      <main className="w-full mx-auto container m-6">
+      
         <Outlet />
-      </main>
-      <Footer />
+      
+      <div>Footer</div>
     </>
   );
 }

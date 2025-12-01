@@ -1,0 +1,63 @@
+.typewriter h1 {
+  overflow: hidden;
+  border-right: .15em solid orange;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: .15em;
+  animation: 
+    typing 2s steps(20, end),
+    blink-caret 0.75s step-end infinite;
+}
+
+.typewriter p {
+  opacity: 0;
+  animation: fadeIn 5s forwards;
+  animation-delay: 2s;
+}
+
+
+/* TYPING EFFECT */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 35%; } /* Adjust width for breakpoints */
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: orange; }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 2s ease-in-out forwards;
+  animation-delay: 2s;
+}
+
+@media screen and (max-width: 1024px) {
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 70%; } /* Adjust width for smaller screens */
+  }  
+}
+
+@media screen and (max-width: 768px) {
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 50%; } /* the 2% makes a difference I swear */
+  }
+}
+@media screen and (max-width: 485px) {
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 80%; } 
+  }
+}
