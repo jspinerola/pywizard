@@ -12,11 +12,14 @@ type TracePayload = { filename: string; code: string; trace: any[] };
 function CodeEditor({
   setOutput,
   onTrace,
+  setCode,
+  code,
 }: {
   setOutput: React.Dispatch<React.SetStateAction<string[]>>;
   onTrace?: (payload: TracePayload) => void;
+  setCode: React.Dispatch<React.SetStateAction<string>>;
+  code: string;
 }) {
-  const [code, setCode] = React.useState('print("Hello, Python!")');
   const [input, setInput] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [ready, setReady] = React.useState(false);
@@ -55,7 +58,10 @@ function CodeEditor({
       if (data.type === "trace") {
         const payload = data.payload as TracePayload;
         // Print to the DevTools console for easier debugging
-        console.log("Trace payload:", JSON.stringify(data, null, 2));
+        console.log(
+          "Trace payload:",
+          JSON.stringify(<datalist></datalist>, null, 2)
+        );
         const stdout =
           (payload.trace || []).map((e: any) => e["out+"] || "").join("") ||
           "(no output)";
@@ -66,7 +72,7 @@ function CodeEditor({
       }
 
       if (data.type === "error") {
-        setOutput([data.message || "An unknown error occurred."]);
+        setOutput(data.payload.error);
         setLoading(false);
         return;
       }
