@@ -4,7 +4,11 @@ import CodeOutput from "./CodeOutput";
 import type { TracePayload } from "../types/trace";
 import TracePlayer from "./trace/TracePlayer";
 
-function CodeWrapper() {
+function CodeWrapper({
+  setShowAIOverview,
+}: {
+  setShowAIOverview?: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [output, setOutput] = React.useState<string[]>([]);
   const [tracePayload, setTracePayload] = React.useState<TracePayload | null>(
     null
@@ -17,12 +21,18 @@ function CodeWrapper() {
             <CodeEditor setOutput={setOutput} onTrace={setTracePayload} />
           </section>
           <section className="h-[24rem] flex flex-col">
-            <CodeOutput output={output} payload={tracePayload} />
+            <CodeOutput
+              output={output}
+              payload={tracePayload}
+              setShowAIOverview={setShowAIOverview}
+            />
           </section>
         </div>
       </div>
       <div className="flex flex-col">
-        <h2 className="font-mono text-2xl font-bold text-secondary mb-4">Visualize</h2>
+        <h2 className="font-mono text-2xl font-bold text-secondary mb-4">
+          Visualize
+        </h2>
         <TracePlayer payload={tracePayload} />
       </div>
     </>

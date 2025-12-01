@@ -6,9 +6,11 @@ import { MessageCircleQuestionIcon } from "lucide-react";
 function CodeOutput({
   output,
   payload,
+  setShowAIOverview,
 }: {
   output: string[];
   payload: TracePayload | null;
+  setShowAIOverview?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
     <>
@@ -16,8 +18,12 @@ function CodeOutput({
         <h2 className="font-mono text-2xl font-bold text-secondary mb-4">
           Output
         </h2>
-        <Button variant="secondary" disabled={!payload}>
-          <MessageCircleQuestionIcon size={16}/> AI Overview
+        <Button
+          variant="secondary"
+          disabled={!payload}
+          onClick={() => setShowAIOverview && setShowAIOverview(true)}
+        >
+          <MessageCircleQuestionIcon size={16} /> AI Overview
         </Button>
       </div>
       <div className="rounded border h-full overflow-y-scroll">

@@ -55,7 +55,10 @@ function CodeEditor({
       if (data.type === "trace") {
         const payload = data.payload as TracePayload;
         // Print to the DevTools console for easier debugging
-        console.log("Trace payload:", JSON.stringify(data, null, 2));
+        console.log(
+          "Trace payload:",
+          JSON.stringify(<datalist></datalist>, null, 2)
+        );
         const stdout =
           (payload.trace || []).map((e: any) => e["out+"] || "").join("") ||
           "(no output)";
@@ -66,7 +69,7 @@ function CodeEditor({
       }
 
       if (data.type === "error") {
-        setOutput([data.message || "An unknown error occurred."]);
+        setOutput(data.payload.error);
         setLoading(false);
         return;
       }
