@@ -8,16 +8,18 @@ function Code() {
   const [code, setCode] = useState('print("Hello, BALLSACK!")');
   return (
     <div>
-      <div className="flex flex-col gap-6 mt-4">
-        {showAIOverview && (
-          <AIOverview setShowAIOverview={setShowAIOverview} code={code} />
-        )}
-        <CodeWrapper
-          setShowAIOverview={setShowAIOverview}
-          setCode={setCode}
-          code={code}
-        />
-      </div>
+      <main className="w-full mx-auto container m-6">  
+        <div className="flex flex-col gap-6 mt-4">
+          {showAIOverview && (
+            <AIOverview setShowAIOverview={setShowAIOverview} code={code} />
+          )}
+          <CodeWrapper
+            setShowAIOverview={setShowAIOverview}
+            setCode={setCode}
+            code={code}
+          />
+        </div>
+      </main>
     </div>
   );
 }
