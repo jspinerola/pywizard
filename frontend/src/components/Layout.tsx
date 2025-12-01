@@ -7,10 +7,8 @@ function Layout() {
   return (
     <>
       <Nav />
-      
-        <Outlet />
-      
-      <div>Footer</div>
+      <Outlet />
+      <Footer />
     </>
   );
 }

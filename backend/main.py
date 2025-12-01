@@ -14,7 +14,7 @@ class Fruits(BaseModel):
   fruits: List[Fruit]
 
 app = FastAPI()
-app.include_router(ai_router) # connecting the router
+app.include_router(ai_router, prefix="/api") # connecting the router
 
 # allowed origins, frontend url
 origins = [

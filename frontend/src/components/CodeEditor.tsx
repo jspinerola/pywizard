@@ -12,11 +12,14 @@ type TracePayload = { filename: string; code: string; trace: any[] };
 function CodeEditor({
   setOutput,
   onTrace,
+  setCode,
+  code,
 }: {
   setOutput: React.Dispatch<React.SetStateAction<string[]>>;
   onTrace?: (payload: TracePayload) => void;
+  setCode: React.Dispatch<React.SetStateAction<string>>;
+  code: string;
 }) {
-  const [code, setCode] = React.useState('print("Hello, Python!")');
   const [input, setInput] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [ready, setReady] = React.useState(false);
