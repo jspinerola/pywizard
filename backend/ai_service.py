@@ -41,17 +41,25 @@ class AIService:
     @staticmethod
     def summarize_text(text_to_summarize):
         """
-        Handles text summarization.
+        Handles text or JSON summarization with a developer-focused prompt.
         """
         try:
-            prompt = f"Please summarize the following text concisely:\n\n{text_to_summarize}"
+            # We explicitly tell Gemini this is code/JSON data
+            prompt = (
+                "You are an expert software engineer. "
+                "The following text is a JSON representation of a code execution or application state. "
+                "Please analyze it and explain clearly what is happening in the code or what the data represents. "
+                "Keep it concise but insightful.\n\n"
+                f"DATA:\n{text_to_summarize}"
+            )
+            
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
             return f"Error in summarization: {str(e)}"
 
-# Simple test block to run this file directly
-if __name__ == "__main__":
-    service = AIService()
-    print("--- Testing Summarization ---")
-    print(service.summarize_text("Python is a high-level, general-purpose programming language. Its design philosophy emphasizes code readability with the use of significant indentation."))
+# Simple test block to run this file directly (Successful)
+# if __name__ == "__main__":
+#     service = AIService()
+#     print("--- Testing Summarization ---")
+#     print(service.summarize_text("Python is a high-level, general-purpose programming language. Its design philosophy emphasizes code readability with the use of significant indentation."))
