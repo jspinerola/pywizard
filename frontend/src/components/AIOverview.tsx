@@ -10,8 +10,6 @@ interface Message {
   content: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 function AIOverview({
   setShowAIOverview,
   code,
@@ -52,11 +50,17 @@ function AIOverview({
     setIsLoading(true);
 
      try {
-      const response = await axios.post(`${API_URL}/api/chat`, {
-        code: code,
-        message: userMessage.content,
-        conversation_history: messages,
-      });
+      // Dummy axios call for future LLM integration
+      // This simulates an API call with a delay
+      // TODO: Replace with actual LLM API endpoint when ready
+      const response = await axios.post(
+        "/api/chat", // Placeholder endpoint - will be replaced with actual LLM endpoint
+        {
+          code: code,
+          message: userMessage.content,
+          conversation_history: messages,
+        }
+      );
 
       // For now, return a dummy response
       // In the future, this will be: response.data.message
