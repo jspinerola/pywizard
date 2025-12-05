@@ -5,7 +5,7 @@ import React, { useState } from "react";
 
 function Code() {
   const [showAIOverview, setShowAIOverview] = useState(false);
-  const [code, setCode] = useState('print("Hello, BALLSACK!")');
+  const [code, setCode] = useState('print("Hello, World!")');
   return (
     <div>
       <main className="w-full mx-auto container m-6">  

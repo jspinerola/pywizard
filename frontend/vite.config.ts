@@ -15,7 +15,7 @@ export default defineConfig({
     proxy: {
       // Any request starting with /api will be forwarded
       "/api": {
-        target: "http://localhost:8080",
+        target: "http://localhost:8000",
         changeOrigin: true,
         // Optional: Rewrite the path (e.g., remove /api)
         // rewrite: (path) => path.replace(/^\/api/, ''),
