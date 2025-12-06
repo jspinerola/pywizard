@@ -72,7 +72,7 @@ function CodeEditor({
       }
 
       if (data.type === "error") {
-        setOutput(data.payload.error);
+        setOutput([data.message || "An unknown error occurred."]);
         setLoading(false);
         return;
       }
