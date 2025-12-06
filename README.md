@@ -67,6 +67,12 @@ python -m venv venv
 ```bash
 pip install -r requirements.txt
 ```
+5. **Set up API Key**
+   - Create a .env file in the backend directory
+   - Write the following in the .env file
+```bash
+GEMINI_API_KEY="your_key_here"
+```
 
 ---
 
