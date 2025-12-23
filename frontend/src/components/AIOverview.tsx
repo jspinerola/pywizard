@@ -49,12 +49,12 @@ function AIOverview({
     setInput("");
     setIsLoading(true);
 
-     try {
+    try {
       // Dummy axios call for future LLM integration
       // This simulates an API call with a delay
       // TODO: Replace with actual LLM API endpoint when ready
       const response = await axios.post(
-        "/api/chat", // Placeholder endpoint - will be replaced with actual LLM endpoint
+        `${import.meta.env.VITE_BACKEND_URL}/api/chat`, // Placeholder endpoint - will be replaced with actual LLM endpoint
         {
           code: code,
           message: userMessage.content,
