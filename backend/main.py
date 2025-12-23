@@ -19,10 +19,9 @@ app.include_router(ai_router, prefix="/api") # connecting the router
 # allowed origins, frontend url
 origins = [
   "http://localhost:5173",
-  "https://pywizard-one.vercel.app/"
+  "https://pywizard-one.vercel.app",
 ]
 
-# for handling CORS
 app.add_middleware(
   CORSMiddleware,
   allow_origins=origins,
